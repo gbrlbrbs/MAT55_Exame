@@ -2,3 +2,6 @@ name = "MAT55_Exame"
 uuid = "d5210693-30da-4d20-96ed-fc2be715e28c"
 authors = ["Gabriel Martinz <gabrielbarbosamartinz_@outlook.com>"]
 version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
