@@ -5,3 +5,4 @@ version = "0.1.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+MarketData = "945b72a4-3b13-509d-9b46-1525bb5c06de"
