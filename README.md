@@ -1,5 +1,5 @@
 # MAT-55 - Exame
 
-Primeiro, você vai precisar do [Git](https://git-scm.com/).
+Exame da matéria MAT-55 - Álgebra Linear Computacional.
 
-Existem duas *branchs* no repositório além da `master`, que são `portfolio` e `numbers`. Para mudar de *branch*, coloque no terminal `git checkout <nome_da_branch>`.
+Neste repositório está uma implementação em Julia da Teoria de Portfolio Moderna, de Harry Markowitz.
