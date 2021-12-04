@@ -5,4 +5,8 @@ version = "0.1.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 MarketData = "945b72a4-3b13-509d-9b46-1525bb5c06de"
+TimeSeries = "9e3dc215-6440-5c97-bce1-76c03772f85e"
