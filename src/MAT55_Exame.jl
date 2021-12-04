@@ -20,4 +20,8 @@ function get_data(ticker::String)::DF.DataFrame
     return df
 end
 
+function foo()
+  println("Hello world")
+end
+
 end # module
