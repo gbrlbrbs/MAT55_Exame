@@ -3,6 +3,7 @@ import TimeSeries as TS
 import MarketData as MD
 import DataFrames as DF
 import Dates as DT
+import HTTP
 
 
 function get_data(ticker::String)::DF.DataFrame
@@ -20,5 +21,12 @@ function get_data(ticker::String)::DF.DataFrame
     return df
 end
 
+# function scrape_wikipedia_table()
+
+# end
+
+# function get_tickers(start_date::DT.Date)
+
+# end
 
 end # module
