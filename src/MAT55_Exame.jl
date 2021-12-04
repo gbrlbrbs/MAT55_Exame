@@ -24,4 +24,8 @@ function foo()
   println("Hello world")
 end
 
+function bar()
+  println("oi")
+end
+
 end # module
