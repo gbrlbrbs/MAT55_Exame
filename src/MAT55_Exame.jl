@@ -1,6 +1,7 @@
 module MAT55_Exame
 
 using DataStructures: OrderedDict
+using Statistics
 import TimeSeries as TS
 import MarketData as MD
 import Dates as DT
@@ -10,27 +11,9 @@ using DataFrames
 using ShiftedArrays
 using Cascadia
 
-export scrape_wikipedia_table, get_data
+export create_returns, get_statistics
 
 const wikipedia_sp500_link = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-
-function get_data(ticker::String, start_dt::DT.Date)::DataFrame
-    end_dt = DT.now()::DT.DateTime
-    try
-        yahoo_data = MD.yahoo(
-            ticker,
-            MD.YahooOpt(
-                period1 = DT.DateTime(start_dt),
-                period2 = end_dt,
-                interval = "1d"
-            )
-        )::TS.TimeArray
-        df = DataFrame(yahoo_data)
-        df
-    catch
-        return DataFrame()
-    end
-end
 
 function scrape_wikipedia_table()::DataFrame
     sp500_page = HTTP.get(wikipedia_sp500_link)::HTTP.Response
@@ -68,7 +51,23 @@ function scrape_wikipedia_table()::DataFrame
     dataframe
 end
 
-
+function get_data(ticker::String, start_dt::DT.Date)::DataFrame
+    end_dt = DT.now()::DT.DateTime
+    try
+        yahoo_data = MD.yahoo(
+            ticker,
+            MD.YahooOpt(
+                period1 = DT.DateTime(start_dt),
+                period2 = end_dt,
+                interval = "1d"
+            )
+        )::TS.TimeArray
+        df = DataFrame(yahoo_data)
+        df
+    catch
+        return DataFrame()
+    end
+end
 
 function create_returns()
     tickers = scrape_wikipedia_table()
@@ -94,7 +93,6 @@ function create_returns()
         end
         transform!(ticker_data, :Close => lag => :Close_lag)
         ticker_data = dropmissing(ticker_data, :Close_lag)
-        println(i)
         transform!(ticker_data, [:Close, :Close_lag] => ((x, y) -> (x ./ y .- 1)) => :returns)
         if (i == 1)
             insertcols!(df, (["date", name] .=> [ticker_data[!, :timestamp], ticker_data[!, :returns]])...)
@@ -103,6 +101,21 @@ function create_returns()
         end
     end
     df
+end
+
+@doc """
+`get_statistics`
+
+Returns the mean vector `μ`, covariance matrix `Σ`, names of the tickers `tickers` and the dates of each return for the assets `dates_df` 
+in the input `DataFrame` as a tuple, in this order.
+"""
+function get_statistics(df::DataFrame)::Tuple{Vector, Matrix, Vector, DataFrame}
+    tickers = names(select(df, Not(:date)))
+    dates_df = select(df, :date)
+    dists = Matrix(select(df, Not(:date)))
+    μ = vec(mean(dists, dims=1))
+    Σ = cov(dists)
+    μ, Σ, tickers, dates_df
 end
 
 end # module
