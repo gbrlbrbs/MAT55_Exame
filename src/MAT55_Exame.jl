@@ -2,6 +2,7 @@ module MAT55_Exame
 
 using DataStructures: OrderedDict
 using Statistics
+using LinearAlgebra
 import TimeSeries as TS
 import MarketData as MD
 import Dates as DT
@@ -11,7 +12,8 @@ using DataFrames
 using ShiftedArrays
 using Cascadia
 
-export create_returns, get_statistics
+export create_returns, get_statistics, create_model_min, create_model_subject_to_return
+export vector_port, portfolio_stats
 
 const wikipedia_sp500_link = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 
@@ -52,6 +54,7 @@ function scrape_wikipedia_table()::DataFrame
 end
 
 function get_data(ticker::String, start_dt::DT.Date)::DataFrame
+
     sleep(0.21)
     end_dt = DT.now()::DT.DateTime
     try
@@ -111,7 +114,10 @@ end
 Returns the mean vector `μ`, covariance matrix `Σ`, names of the tickers `tickers` and the dates of each return for the assets `dates_df` 
 in the input `DataFrame` as a tuple, in this order.
 """
-function get_statistics(df::DataFrame)::Tuple{Vector{Float64}, Matrix{Float64}, Vector{String}, DataFrame}
+function get_statistics(
+    df::DataFrame
+    )::Tuple{Vector{Float64}, Matrix{Float64}, Vector{String}, DataFrame}
+
     tickers = names(select(df, Not(:date)))
     dates_df = select(df, :date)
     dists = Matrix(select(df, Not(:date)))
@@ -120,11 +126,54 @@ function get_statistics(df::DataFrame)::Tuple{Vector{Float64}, Matrix{Float64}, 
     μ, Σ, tickers, dates_df
 end
 
-function create_linear_model(Σ::Matrix{Float64})::Tuple{Matrix{Float64}, Vector{Float64}}
+function create_model_min(
+    Σ::Matrix{Float64}
+    )::Tuple{Matrix{Float64}, Vector{Float64}}
+
     n = size(Σ, 1)
     A = [2 .* Σ ones(n); ones(n)' 0]
     b = [zeros(n); 1]
     A, b
+end
+
+function create_model_subject_to_return(
+    μ_exp::Float64,
+    μ::Vector{Float64}
+    Σ::Matrix{Float64}
+    )::Tuple{Matrix{Float64}, Vector{Float64}}
+
+    n = size(Σ, 1)
+    A = [
+        2 .* Σ μ ones(n);
+        μ' 0 0;
+        ones(n)' 0 0
+        ]
+    b = [zeros(n); μ_exp; 1]
+    A, b
+end
+
+function vector_port(A::Matrix{Float64}, b::Vector{Float64})
+
+    U, S, V = svd(A)
+    S_1 = Diagonal(S)
+    
+    # Vetor dos portfólios e o(s) λ(s) (multiplicador(es) de Laplace)
+    x = V * inv(S_1) * U' * b 
+    x
+end
+
+function portfolio_stats(μ::Array{Float64,1}, m::Array{Float64,1}, Σ::Matrix{Float64})
+
+    # Valor esperado para o vetor m
+    μ_gmin = dot(m, μ)
+
+    # Desvio padrão do portfólio
+    # abs serve para resultados muito próximos de 0
+    σ_gmin2 = abs(m' * Σ * m)
+    σ_gmin = sqrt(σ_gmin2)
+    
+    μ_gmin, σ_gmin
+
 end
 
 end # module
