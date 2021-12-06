@@ -52,6 +52,7 @@ function scrape_wikipedia_table()::DataFrame
 end
 
 function get_data(ticker::String, start_dt::DT.Date)::DataFrame
+    sleep(0.21)
     end_dt = DT.now()::DT.DateTime
     try
         yahoo_data = MD.yahoo(
@@ -64,7 +65,8 @@ function get_data(ticker::String, start_dt::DT.Date)::DataFrame
         )::TS.TimeArray
         df = DataFrame(yahoo_data)
         df
-    catch
+    catch e
+        showerror(stdout, e)
         return DataFrame()
     end
 end
@@ -86,7 +88,7 @@ function create_returns()
     maxdate = combine(tickers, "Date first added" => maximum)[1, 1]
     ticker_names = tickers[!, "Symbol"]
     df = DataFrame()
-    for (i, name) in enumerate(ticker_names)
+    for name in ticker_names
         ticker_data = get_data(name, maxdate)
         if isempty(ticker_data)
             continue
@@ -94,7 +96,7 @@ function create_returns()
         transform!(ticker_data, :Close => lag => :Close_lag)
         ticker_data = dropmissing(ticker_data, :Close_lag)
         transform!(ticker_data, [:Close, :Close_lag] => ((x, y) -> (x ./ y .- 1)) => :returns)
-        if (i == 1)
+        if !("date" in names(df))
             insertcols!(df, (["date", name] .=> [ticker_data[!, :timestamp], ticker_data[!, :returns]])...)
         else
             insertcols!(df, name => ticker_data[!, :returns])
@@ -109,13 +111,20 @@ end
 Returns the mean vector `μ`, covariance matrix `Σ`, names of the tickers `tickers` and the dates of each return for the assets `dates_df` 
 in the input `DataFrame` as a tuple, in this order.
 """
-function get_statistics(df::DataFrame)::Tuple{Vector, Matrix, Vector, DataFrame}
+function get_statistics(df::DataFrame)::Tuple{Vector{Float64}, Matrix{Float64}, Vector{String}, DataFrame}
     tickers = names(select(df, Not(:date)))
     dates_df = select(df, :date)
     dists = Matrix(select(df, Not(:date)))
     μ = vec(mean(dists, dims=1))
     Σ = cov(dists)
     μ, Σ, tickers, dates_df
+end
+
+function create_linear_model(Σ::Matrix{Float64})::Tuple{Matrix{Float64}, Vector{Float64}}
+    n = size(Σ, 1)
+    A = [2 .* Σ ones(n); ones(n)' 0]
+    b = [zeros(n); 1]
+    A, b
 end
 
 end # module
