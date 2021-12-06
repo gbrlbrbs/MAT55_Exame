@@ -138,7 +138,7 @@ end
 
 function create_model_subject_to_return(
     μ_exp::Float64,
-    μ::Vector{Float64}
+    μ::Vector{Float64},
     Σ::Matrix{Float64}
     )::Tuple{Matrix{Float64}, Vector{Float64}}
 
@@ -162,7 +162,7 @@ function vector_port(A::Matrix{Float64}, b::Vector{Float64})
     x
 end
 
-function portfolio_stats(μ::Array{Float64,1}, m::Array{Float64,1}, Σ::Matrix{Float64})
+function portfolio_stats(m::Array{Float64,1}, μ::Array{Float64,1}, Σ::Matrix{Float64})
 
     # Valor esperado para o vetor m
     μ_gmin = dot(m, μ)
