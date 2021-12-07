@@ -4,6 +4,7 @@ authors = ["Gabriel Martinz <gabrielbarbosamartinz_@outlook.com>"]
 version = "0.1.0"
 
 [deps]
+Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
 Cascadia = "54eefc05-d75b-58de-a785-1a3403f0919f"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
